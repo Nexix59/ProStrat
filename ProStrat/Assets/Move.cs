@@ -5,50 +5,26 @@ using UnityEngine;
 
 public class Move : MonoBehaviour
 {
-    [Header("Zooming")]
-    public Camera GodView;
-    private float baseView = 60f;
-
-    [Header("Movement")]
-    [SerializeField] private KeyCode moveyy = KeyCode.Mouse1;
-
-    [Header("Cursor")]
-    public Texture2D cursorTexture;
-    public CursorMode cursorMode = CursorMode.Auto;
-    public Vector2 hotSpot = Vector2.zero;
-
-    void Start()
-    {
-        
-        GodView.fieldOfView = baseView;
-    } 
-    private void OnMouseEnter()
-    {
-        Cursor.SetCursor(cursorTexture, hotSpot, cursorMode);
-    }
-
+    public bool _CanMove;
+    public float _ScrollSpeed;
+    public float _Drag_Speed;
+    KeyCode _Camera_Drag_Key = KeyCode.Mouse2;
+    Vector3 _Origin;
     void Update()
     {
-        if (Input.GetAxis("Mouse ScrollWheel") > 0) // forward
-        {
-            GodView.fieldOfView += 10f;
-        }
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0) // backwards
-        {
-            GodView.fieldOfView -= 10f;
-        }
-
-        GodView.fieldOfView = Mathf.Clamp
-        (GodView.fieldOfView + Input.GetAxis("Mouse ScrollWheel"), 30f, 90f);
-
+        if (_CanMove) _Cam_Movement();
     }
 
-
-    private void canMove()
+    void _Cam_Movement()
     {
-        if (Input.GetKeyDown(moveyy))
-        {
+        if (Input.GetKeyDown(_Camera_Drag_Key))
+            _Origin = GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);
+        if (Input.GetKey(_Camera_Drag_Key))
+            transform.position += (_Origin - GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition)) * _Drag_Speed;
 
-        }
+        if (Input.mouseScrollDelta == new Vector2(0, 1) && GetComponent<Camera>().orthographicSize >= 100)
+            GetComponent<Camera>().orthographicSize += -Input.mouseScrollDelta.y * _ScrollSpeed;
+        if (Input.mouseScrollDelta == new Vector2(0, -1) && GetComponent<Camera>().orthographicSize <= 4000)
+            GetComponent<Camera>().orthographicSize += -Input.mouseScrollDelta.y * _ScrollSpeed;
     }
 }
